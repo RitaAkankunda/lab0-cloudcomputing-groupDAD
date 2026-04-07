@@ -3,6 +3,7 @@ Step 1: Install OpenSSH Client
 Open PowerShell as Administrator and run:
 
 Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
+
  Step 2: Fix PATH (if ssh-add opens apps instead)
 
 If running ssh-add opens a “Choose an app” dialog, fix it:
