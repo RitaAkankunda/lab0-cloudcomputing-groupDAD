@@ -1,60 +1,28 @@
-Step 1: Install OpenSSH Client
+📝 Lab 0 Documentation: Windows Implementation
+1. Account & Project Setup
+Action: Registered as csc26dad under the CraneCloud project.
 
-Open PowerShell as Administrator and run:
+Group Sync: Successfully verified the account via the group email (csc26-dad@cit.ac.ug).
 
-Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
+Key Management: Uploaded multiple public keys (for all group members) to the shared account to ensure multi-user access.
 
- Step 2: Fix PATH (if ssh-add opens apps instead)
+2. Infrastructure Configuration
+Default Shell: Changed the default shell to bash in the CloudLab "Manage Account" settings as recommended for script compatibility.
 
-If running ssh-add opens a “Choose an app” dialog, fix it:
+Experiment: Instantiated the csc2202-cloud-project profile as DAD-lab0 on the Utah cluster.
 
- Remove incorrect ssh-add file
-Remove-Item C:\Windows\System32\ssh-add
+3. SSH Authentication Agent (The Windows Challenge)
+The manual requested the use of ssh-agent. On our Windows machines, we implemented this using the Windows OpenSSH Authentication Agent service:
 
- Add OpenSSH to PATH
-$env:PATH += ";C:\Windows\System32\OpenSSH"
+Service Initialization: Instead of the Linux ssh-agent command, we used PowerShell to set the service to Automatic and started it.
 
-Verify:
+Identity Loading: Used ssh-add to load the private key (id_ed25519) into the local session.
 
-where.exe ssh-add
+Agent Forwarding: Successfully used the -A flag to connect to ms0823.utah.cloudlab.us. This confirms that our local keys can now be used by scripts running on the server to talk to other nodes.
 
- Expected output:
+💡 Reflection: What worked and what didn't
+Worked Well: The ssh-add and ssh -A commands are universal! Once the Windows service was running, the experience was identical to the Linux instructions.
 
-C:\Windows\System32\OpenSSH\ssh-add.exe
- Step 3: Start the SSH Agent
-Start-Service ssh-agent
-Get-Service ssh-agent
+Challenges: The "Permission Denied" errors were initially confusing, but we discovered this was due to the Utah cluster sync delay (it takes ~5 minutes for the server to recognize a new key added to the website).
 
- Status should be:
-
-Running
- Step 4: Generate an SSH Key
-
-If you don’t already have a key:
-
-ssh-keygen -t ed25519 -C "your_email@example.com"
-
-Press Enter to save in default location:
-
-C:\Users\USERNAME\.ssh\id_ed25519
- Step 5: Add Key to SSH Agent
-ssh-add C:\Users\NAIRAH\.ssh\id_ed25519
-
-Output:
-
-Identity added
- Step 6: Copy Your Public Key
-Get-Content $env:USERPROFILE\.ssh\id_ed25519.pub
-
-
-
-ssh-ed25519 AAAAC3Nz... nairah@NAIRAH
-☁️ Step 7: Upload Key to CloudLab
-Log in to: https://www.cloudlab.us/ssh-keys.php
-Paste your public key into “Add Key”
-Click Submit
-Wait 1–2 minutes
-🔗 Step 8: Connect to Your Node
-ssh <username>@<node>.apt.emulab.net
-Example:
-ssh csc26dad@apt038.apt.emulab.net
+Windows-Specific Fixes: We had to manually point ssh-add to the $env:USERPROFILE path because Windows handles file shortcuts differently than Linux.
